@@ -14,5 +14,9 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'semi': ["error", "always"],
+    "semi-spacing": ["error", {"before": false, "after": true}],
+    "semi-style": ["error", "last"],
+    "no-extra-semi": "error",
   },
 }
