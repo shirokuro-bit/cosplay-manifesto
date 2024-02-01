@@ -1,0 +1,1 @@
+export const acceptFiles = {"image/jpeg": [], "image/png": [], "image/webp": []};

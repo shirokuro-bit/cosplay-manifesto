@@ -1,6 +1,7 @@
 import {useDropzone} from "react-dropzone";
 import React, {useCallback} from "react";
 import {imageItemType} from "../App.tsx";
+import {acceptFiles} from "./dropZoneOption.ts";
 
 type ImgDropZoneType = {
   setState: React.Dispatch<React.SetStateAction<imageItemType[]>>
@@ -20,14 +21,14 @@ export const ImgDropZone = ({setState}:ImgDropZoneType) => {
             y: 0,
             width: image.width,
             height: image.height,
-          }
+          };
           return [...prevState, tmp];
-        })
+        });
       };
       image.src = e.target!.result as string;
     };
     reader.readAsDataURL(file);
-  }
+  };
   
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length < 2) {
@@ -35,8 +36,7 @@ export const ImgDropZone = ({setState}:ImgDropZoneType) => {
     }
   }, []);
   
-  const {getRootProps, getInputProps} = useDropzone({onDrop, accept: {"image/jpeg": [], "image/png": [],}})
-  // X image/jpeg,image/png,image/webp
+  const {getRootProps, getInputProps} = useDropzone({onDrop, accept: acceptFiles});
   
   return (
     <div {...getRootProps()}>
@@ -44,4 +44,4 @@ export const ImgDropZone = ({setState}:ImgDropZoneType) => {
       <input {...getInputProps()}/>
     </div>
   );
-}
+};
