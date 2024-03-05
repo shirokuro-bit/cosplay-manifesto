@@ -46,7 +46,7 @@ export const ImgLayerItem = ({item, imageLayerItems, isSelected, setImageLayerIt
       height: Math.max(node.height() * scaleY),
     };
     setImageLayerItems(items);
-  }
+  };
   
   return (
     <Fragment>
@@ -78,4 +78,4 @@ export const ImgLayerItem = ({item, imageLayerItems, isSelected, setImageLayerIt
         />
       )}
     </Fragment>);
-}
+};

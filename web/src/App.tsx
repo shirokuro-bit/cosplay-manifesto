@@ -1,15 +1,14 @@
 import {Fragment, useEffect, useRef, useState} from "react";
 import {MenuButton} from "./component/MenuButton.tsx";
-import {Image, Layer, Rect, Stage, Text} from "react-konva";
+import {Image, Layer, Stage, Text} from "react-konva";
 import {KonvaEventObject} from "konva/lib/Node";
 import Konva from "konva";
 import {TemplateDropZone} from "./component/TemplateDropZone.tsx";
 import {ImgDropZone} from "./component/ImgDropZone.tsx";
-import DeleteIcon from "./assets/delete_FILL0_wght400_GRAD0_opsz24.svg"
+import DeleteIcon from "./assets/delete_FILL0_wght400_GRAD0_opsz24.svg";
 import {ImgLayerItem} from "./component/ImgLayerItem.tsx";
 
-
-type effectItemType = {
+export type effectItemType = {
   id: string,
   text: string,
   fontSize: number
@@ -34,17 +33,16 @@ export type modeType = {
 const defaultMode: modeType = {
   text: "Aa",
   fontSize: 30,
-}
-
+};
 
 const App = () => {
   const [mode, setMode] = useState<modeType>(defaultMode);
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
   const [imageLayerItems, setImageLayerItems] = useState<imageItemType[]>([]);
-  const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([])
+  const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
   
-  const [selectId, setSelectId] = useState<string | null>(null)
+  const [selectId, setSelectId] = useState<string | null>(null);
   
   const stageRef = useRef<Konva.Stage>(null!);
   const textAreaRef = useRef<HTMLTextAreaElement>(null!);
@@ -59,16 +57,16 @@ const App = () => {
             imageLayerItems={imageLayerItems}
             isSelected={selectId === item.id}
             onSelect={() => setSelectId(item.id)}
-            setImageLayerItems={setImageLayerItems}/>
+            setImageLayerItems={setImageLayerItems}/>;
         })}
       </>
     );
-  }
+  };
+  
   const templateLayer = () => {
-    return (
-      <Image image={templateImage}/>
-    );
-  }
+    return <Image image={templateImage}/>;
+  };
+  
   const effectLayer = () => {
     return (
       <>
@@ -78,15 +76,13 @@ const App = () => {
             name={item.id}
             text={item.text}
             fontSize={item.fontSize}
-            // align={"center"}
-            // verticalAlign={"middle"}
             draggable
             x={item.x}
             y={item.y}
             fill={"green"}
-            // onDragStart={() => setMode({text: "削除", fontSize: 0})}
+            onDragStart={() => setMode({text: "削除", fontSize: 0})}
             onDragEnd={effectItemHandleDragEnd}
-          />
+          />;
         })}
       </>
     );
@@ -108,45 +104,32 @@ const App = () => {
   const overlayLayerItem = () => {
     const deleteIcon = new window.Image();
     deleteIcon.src = DeleteIcon;
-    if (stageRef.current == null) return
-    const stageSize = stageRef.current.getSize()
+    if (stageRef.current == null) return;
+    const stageSize = stageRef.current.getSize();
     
     return (<Image image={deleteIcon}
                    visible={mode.text == "削除"}
                    x={(stageSize.width * 0.5) - (deleteIcon.width * 0.5)}
                    y={stageSize.height * 0.85 - (deleteIcon.height * 0.5)}
     />);
-  }
-  
-  const imageItemHandleDragEnd = (e: KonvaEventObject<DragEvent>) => {
-    const id = e.target.name();
-    const items = imageLayerItems.slice();
-    const item = imageLayerItems.find((i) => i.id === id)!;
-    const index = imageLayerItems.indexOf(item);
-    items[index] = {
-      ...item,
-      x: e.target.x(),
-      y: e.target.y(),
-    };
-    setImageLayerItems(items);
-  }
+  };
   
   const isDeleteArea = (position: { x: number, y: number }, size: { width: number, height: number }): boolean => {
     const itemCenterPosition = {
       x: position.x + (size.width * 0.5),
       y: position.y + (size.height * 0.5)
-    }
+    };
     
-    const stageSize = stageRef.current.getSize()
+    const stageSize = stageRef.current.getSize();
     const deleteArea = {
       beginX: stageSize.width * 0.5 - 10,
       endX: stageSize.width * 0.5 + 10,
       beginY: stageSize.height * 0.85 - 10,
       endY: stageSize.height * 0.85 + 10
-    }
+    };
     
     return ((deleteArea.beginX < itemCenterPosition.x && itemCenterPosition.x < deleteArea.endX) && (deleteArea.beginY < itemCenterPosition.y && itemCenterPosition.y < deleteArea.endY));
-  }
+  };
   
   const effectItemHandleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const id = e.target.name();
@@ -159,8 +142,8 @@ const App = () => {
       x: e.target.x(),
       y: e.target.y(),
     };
-    if (mode.text == "削除" && isDeleteArea(e.target.position(), e.target.size())) items.splice(index, 1)
     // setMode(defaultMode)
+    if (mode.text == "削除" && isDeleteArea(e.target.position(), e.target.size())) items.splice(index, 1);
     setEffectLayerItems(items);
   };
   
@@ -168,9 +151,9 @@ const App = () => {
     if (templateImage || imageLayerItems) {
       // 画像が読み込まれたらステージを再描画
       // 画像の読み込みに関する処理をここに移動する
-      let layer
+      let layer;
       if (isLayerSwap) {
-        layer = [templateLayer(), imgLayer(), overlayLayer(), effectLayer(), overlayLayerItem()]
+        layer = [templateLayer(), imgLayer(), overlayLayer(), effectLayer(), overlayLayerItem()];
       } else {
         layer = [imgLayer(), templateLayer(), overlayLayer(), effectLayer(), overlayLayerItem()];
       }
@@ -181,11 +164,11 @@ const App = () => {
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), overlayLayer(), effectLayer(), overlayLayerItem()])
   
   const onClickPosition = (e: KonvaEventObject<MouseEvent | Event>) => {
-    if (mode.text == "削除") return
-    let text = mode.text
+    if (mode.text == "削除") return;
+    let text = mode.text;
     if (mode.text == "Aa") {
       text = textAreaRef.current.value;
-      if (text == "") return
+      if (text == "") return;
     }
     const tmp: effectItemType = {
       id: "EffectItemNode-" + effectLayerItems.length,
@@ -194,8 +177,8 @@ const App = () => {
       x: e.target.getStage()!.pointerPos!.x,
       y: e.target.getStage()!.pointerPos!.y
     };
-    setEffectLayerItems(prevState => [...prevState, tmp])
-  }
+    setEffectLayerItems(prevState => [...prevState, tmp]);
+  };
   
   return (
     <>
@@ -209,12 +192,12 @@ const App = () => {
         <button onClick={() => {
           setLayerSwap(prevState => {
             if (prevState) {
-              setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()])
+              setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
             } else {
-              setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()])
+              setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()]);
             }
-            return !prevState
-          })
+            return !prevState;
+          });
         }} value={"背面を編集"}>{"背面を編集"}</button>
         <button onClick={() => {
           const uri = stageRef.current.toDataURL();
@@ -242,10 +225,10 @@ const App = () => {
         </Layer>
       </Stage>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
 //TODO: 削除機能改良
 //TODO: タップした位置を中心にエフェクト生成(textAline, baseLine)
 //TODO: イメージ画像のトリミング
