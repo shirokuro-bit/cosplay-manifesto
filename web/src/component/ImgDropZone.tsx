@@ -15,7 +15,7 @@ export const ImgDropZone = ({setState}:ImgDropZoneType) => {
       image.onload = () => {
         setState(prevState => {
           const tmp:imageItemType = {
-            id: "ImageItemNode" + prevState.length,
+            id: "ImageItemNode-" + prevState.length,
             image: image,
             x: 0,
             y: 0,

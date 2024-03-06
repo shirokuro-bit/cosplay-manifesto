@@ -64,7 +64,7 @@ const App = () => {
   };
   
   const templateLayer = () => {
-    return <Image image={templateImage}/>;
+    return <Image image={templateImage} name={"template"}/>;
   };
   
   const effectLayer = () => {
@@ -153,11 +153,16 @@ const App = () => {
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
   const onClickPosition = (e: KonvaEventObject<MouseEvent | Event>) => {
+    if (e.target.name() === "template") {
+      setSelectId(null);
+    }
+    
     let text = mode.text;
     if (mode.text == "Aa") {
       text = textAreaRef.current.value;
       if (text == "") return;
     }
+    
     const tmp: effectItemType = {
       id: "EffectItemNode-" + effectLayerItems.length,
       text: text,
