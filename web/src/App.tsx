@@ -82,24 +82,12 @@ const App = () => {
             fill={"green"}
             onDragStart={() => setMode({text: "削除", fontSize: 0})}
             onDragEnd={effectItemHandleDragEnd}
+            onTouchEnd={effectItemHandleDragEnd}
           />;
         })}
       </>
     );
-  }
-  
-  const overlayLayer = () => {
-    if (stageRef.current == null) return
-    const stageSize = stageRef.current.getSize()
-    return (<Rect width={stageSize.width}
-                  height={stageSize.height}
-                  fill={"gray"}
-                  opacity={0.8}
-                  visible={mode.text == "削除"}
-      // onClick={() => setMode(defaultMode)}
-      // onTap={() => setMode(defaultMode)}
-    />);
-  }
+  };
   
   const overlayLayerItem = () => {
     const deleteIcon = new window.Image();
@@ -114,12 +102,7 @@ const App = () => {
     />);
   };
   
-  const isDeleteArea = (position: { x: number, y: number }, size: { width: number, height: number }): boolean => {
-    const itemCenterPosition = {
-      x: position.x + (size.width * 0.5),
-      y: position.y + (size.height * 0.5)
-    };
-    
+  const isDeleteArea = (pointer: { x: number, y: number }): boolean => {
     const stageSize = stageRef.current.getSize();
     const deleteArea = {
       beginX: stageSize.width * 0.5 - 10,
@@ -127,11 +110,13 @@ const App = () => {
       beginY: stageSize.height * 0.85 - 10,
       endY: stageSize.height * 0.85 + 10
     };
+
+    //TODO: 環境に応じて削除の判定範囲を変える
     
-    return ((deleteArea.beginX < itemCenterPosition.x && itemCenterPosition.x < deleteArea.endX) && (deleteArea.beginY < itemCenterPosition.y && itemCenterPosition.y < deleteArea.endY));
+    return ((deleteArea.beginX < pointer.x && pointer.x < deleteArea.endX) && (deleteArea.beginY < pointer.y && pointer.y < deleteArea.endY));
   };
   
-  const effectItemHandleDragEnd = (e: KonvaEventObject<DragEvent>) => {
+  const effectItemHandleDragEnd = (e: KonvaEventObject<DragEvent | TouchEvent>) => {
     const id = e.target.name();
     const items = effectLayerItems.slice();
     const item = effectLayerItems.find((i) => i.id === id)!;
@@ -142,8 +127,12 @@ const App = () => {
       x: e.target.x(),
       y: e.target.y(),
     };
-    // setMode(defaultMode)
-    if (mode.text == "削除" && isDeleteArea(e.target.position(), e.target.size())) items.splice(index, 1);
+    if (stageRef.current.pointerPos == null) {
+      console.error("ポインターを取得できません");
+      return;
+    }
+    if (mode.text == "削除" && isDeleteArea(stageRef.current.pointerPos)) items.splice(index, 1);
+    setMode(defaultMode);
     setEffectLayerItems(items);
   };
   
@@ -153,18 +142,17 @@ const App = () => {
       // 画像の読み込みに関する処理をここに移動する
       let layer;
       if (isLayerSwap) {
-        layer = [templateLayer(), imgLayer(), overlayLayer(), effectLayer(), overlayLayerItem()];
+        layer = [templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()];
       } else {
-        layer = [imgLayer(), templateLayer(), overlayLayer(), effectLayer(), overlayLayerItem()];
+        layer = [imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()];
       }
       setLayer(layer);
     }
   }, [templateImage, effectLayerItems, imageLayerItems, mode, selectId]);
   
-  const [layer, setLayer] = useState([imgLayer(), templateLayer(), overlayLayer(), effectLayer(), overlayLayerItem()])
+  const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
   const onClickPosition = (e: KonvaEventObject<MouseEvent | Event>) => {
-    if (mode.text == "削除") return;
     let text = mode.text;
     if (mode.text == "Aa") {
       text = textAreaRef.current.value;
@@ -188,7 +176,6 @@ const App = () => {
         <textarea ref={textAreaRef}></textarea>
         <MenuButton setState={setMode} value={"○"} fontSize={90}/>
         <MenuButton setState={setMode} value={"✔"} fontSize={30}/>
-        <MenuButton setState={setMode} value={"削除"} fontSize={30}/>
         <button onClick={() => {
           setLayerSwap(prevState => {
             if (prevState) {
@@ -229,7 +216,7 @@ const App = () => {
 };
 
 export default App;
-//TODO: 削除機能改良
+//TODO: イメージレイヤーの画像の削除機能
 //TODO: タップした位置を中心にエフェクト生成(textAline, baseLine)
 //TODO: イメージ画像のトリミング
 //TODO: 全体のリファクタリング
