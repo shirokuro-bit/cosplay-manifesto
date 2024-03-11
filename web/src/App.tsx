@@ -25,8 +25,10 @@ export type imageItemType = {
   height: number
 }
 
+export type inputModeType =  "Aa" | "○" | "✔" | "削除";
+
 export type modeType = {
-  text: "Aa" | "" | "○" | "✔" | "削除" | string,
+  text: inputModeType,
   fontSize: number
 }
 
@@ -157,11 +159,10 @@ const App = () => {
       setSelectId(null);
     }
     
-    let text = mode.text;
-    if (mode.text == "Aa") {
-      text = textAreaRef.current.value;
-      if (text == "") return;
-    }
+    if (isLayerSwap) return;
+    
+    const text = mode.text === "Aa" ? textAreaRef.current.value : mode.text;
+    if (text == "") return;
     
     const tmp: effectItemType = {
       id: "EffectItemNode-" + effectLayerItems.length,
@@ -223,6 +224,8 @@ const App = () => {
 export default App;
 //TODO: イメージレイヤーの画像の削除機能
 //TODO: タップした位置を中心にエフェクト生成(textAline, baseLine)
+//TODO: エフェクトのスタイルを選べるようにする
+//TODO: 背景編集Modeなのかを分かりやすくする
 //TODO: イメージ画像のトリミング
 //TODO: 全体のリファクタリング
 //TODO: MUI導入
