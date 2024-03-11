@@ -165,7 +165,7 @@ const App = () => {
     if (text == "") return;
     
     const tmp: effectItemType = {
-      id: "EffectItemNode-" + effectLayerItems.length,
+      id: "EffectItemNode-" + crypto.randomUUID(),
       text: text,
       fontSize: mode.fontSize,
       x: e.target.getStage()!.pointerPos!.x,
