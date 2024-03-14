@@ -177,6 +177,17 @@ const App = () => {
   return (
     <>
       <h1>コスプレ-参加表明</h1>
+      <h2>注意書き</h2>
+      <ul>
+        サイトについて
+        <li>本サービスはユーザーの端末で完結するサービスです。サーバーに画像データ等が送られることはございません。</li>
+        <li>ただし、サービスの検証・改善のためGoogleのアクセス解析ツールにて情報収集を行っております。</li>
+      </ul>
+      <ul>
+        機能について
+        <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
+      </ul>
+      
       <div id={"menu"}>
         <MenuButton setState={setMode} value={"Aa"} fontSize={30}/>
         <textarea ref={textAreaRef}></textarea>
