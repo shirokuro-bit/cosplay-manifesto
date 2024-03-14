@@ -81,7 +81,6 @@ const App = () => {
             draggable
             x={item.x}
             y={item.y}
-            fill={"green"}
             onDragStart={() => setMode({text: "削除", fontSize: 0})}
             onDragEnd={effectItemHandleDragEnd}
             onTouchEnd={effectItemHandleDragEnd}
@@ -239,4 +238,3 @@ export default App;
 //TODO: 背景編集Modeなのかを分かりやすくする
 //TODO: イメージ画像のトリミング
 //TODO: 全体のリファクタリング
-//TODO: MUI導入
