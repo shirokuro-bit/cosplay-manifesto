@@ -111,8 +111,6 @@ const App = () => {
       beginY: stageSize.height * 0.85 - 10,
       endY: stageSize.height * 0.85 + 10
     };
-
-    //TODO: 環境に応じて削除の判定範囲を変える
     
     return ((deleteArea.beginX < pointer.x && pointer.x < deleteArea.endX) && (deleteArea.beginY < pointer.y && pointer.y < deleteArea.endY));
   };
@@ -232,9 +230,3 @@ const App = () => {
 };
 
 export default App;
-//TODO: イメージレイヤーの画像の削除機能
-//TODO: タップした位置を中心にエフェクト生成(textAline, baseLine)
-//TODO: エフェクトのスタイルを選べるようにする
-//TODO: 背景編集Modeなのかを分かりやすくする
-//TODO: イメージ画像のトリミング
-//TODO: 全体のリファクタリング
