@@ -1,5 +1,5 @@
 import {Fragment, useEffect, useRef, useState} from "react";
-import {MenuButton} from "./component/MenuButton.tsx";
+import {MenuItems} from "./component/MenuItems.tsx";
 import {Image, Layer, Stage, Text} from "react-konva";
 import {KonvaEventObject} from "konva/lib/Node";
 import Konva from "konva";
@@ -47,7 +47,7 @@ const App = () => {
   const [selectId, setSelectId] = useState<string | null>(null);
   
   const stageRef = useRef<Konva.Stage>(null!);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null!);
+  const [effectText, setEffectText] = useState<string>("");
   
   const imgLayer = () => {
     return (
@@ -81,7 +81,6 @@ const App = () => {
             draggable
             x={item.x}
             y={item.y}
-            fill={"green"}
             onDragStart={() => setMode({text: "削除", fontSize: 0})}
             onDragEnd={effectItemHandleDragEnd}
             onTouchEnd={effectItemHandleDragEnd}
@@ -112,8 +111,6 @@ const App = () => {
       beginY: stageSize.height * 0.85 - 10,
       endY: stageSize.height * 0.85 + 10
     };
-
-    //TODO: 環境に応じて削除の判定範囲を変える
     
     return ((deleteArea.beginX < pointer.x && pointer.x < deleteArea.endX) && (deleteArea.beginY < pointer.y && pointer.y < deleteArea.endY));
   };
@@ -161,7 +158,7 @@ const App = () => {
     
     if (isLayerSwap) return;
     
-    const text = mode.text === "Aa" ? textAreaRef.current.value : mode.text;
+    const text = mode.text === "Aa" ? effectText : mode.text;
     if (text == "") return;
     
     const tmp: effectItemType = {
@@ -174,38 +171,47 @@ const App = () => {
     setEffectLayerItems(prevState => [...prevState, tmp]);
   };
   
+  const onDownloadClick = () => {
+    const uri = stageRef.current.toDataURL();
+    const link = document.createElement('a');
+    link.download = "参加表明";
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  const onSwapClick = () => {
+    setLayerSwap(prevState => {
+      if (prevState) {
+        setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
+      } else {
+        setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()]);
+      }
+      return !prevState;
+    });
+  };
+  
   return (
     <>
-      <h1>コスプレ-参加表明</h1>
-      <div id={"menu"}>
-        <MenuButton setState={setMode} value={"Aa"} fontSize={30}/>
-        <textarea ref={textAreaRef}></textarea>
-        <MenuButton setState={setMode} value={"○"} fontSize={90}/>
-        <MenuButton setState={setMode} value={"✔"} fontSize={30}/>
-        <button onClick={() => {
-          setLayerSwap(prevState => {
-            if (prevState) {
-              setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
-            } else {
-              setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()]);
-            }
-            return !prevState;
-          });
-        }} value={"背面を編集"}>{"背面を編集"}</button>
-        <button onClick={() => {
-          const uri = stageRef.current.toDataURL();
-          const link = document.createElement('a');
-          link.download = "参加表明";
-          link.href = uri;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }}>{"ダウンロード"}</button>
-        <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
-           data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
-        <script src="https://platform.twitter.com/widgets.js"></script>
-        <p>{mode.text}</p>
-      </div>
+      <h1>コスマニ</h1>
+      <h2>注意書き</h2>
+      <ul>
+        サイトについて
+        <li>本サービスはユーザーの端末で完結するサービスです。サーバーに画像データ等が送られることはございません。</li>
+        <li>ただし、サービスの検証・改善のためGoogleのアクセス解析ツールにて情報収集を行っております。</li>
+      </ul>
+      <ul>
+        機能について
+        <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
+      </ul>
+      
+      <MenuItems setMode={setMode} mode={mode} setEffectText={setEffectText} onDownloadClick={onDownloadClick}
+                 onSwapClick={onSwapClick}/>
+      
+      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
+         data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
+      <script src="https://platform.twitter.com/widgets.js"></script>
       <TemplateDropZone setState={setTemplateImage}/>
       <ImgDropZone setState={setImageLayerItems}/>
       
@@ -222,10 +228,3 @@ const App = () => {
 };
 
 export default App;
-//TODO: イメージレイヤーの画像の削除機能
-//TODO: タップした位置を中心にエフェクト生成(textAline, baseLine)
-//TODO: エフェクトのスタイルを選べるようにする
-//TODO: 背景編集Modeなのかを分かりやすくする
-//TODO: イメージ画像のトリミング
-//TODO: 全体のリファクタリング
-//TODO: MUI導入
