@@ -1,5 +1,5 @@
 import {Fragment, useEffect, useRef, useState} from "react";
-import {MenuButton} from "./component/MenuButton.tsx";
+import {MenuItems} from "./component/MenuItems.tsx";
 import {Image, Layer, Stage, Text} from "react-konva";
 import {KonvaEventObject} from "konva/lib/Node";
 import Konva from "konva";
@@ -47,7 +47,7 @@ const App = () => {
   const [selectId, setSelectId] = useState<string | null>(null);
   
   const stageRef = useRef<Konva.Stage>(null!);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null!);
+  const [effectText, setEffectText] = useState<string>("");
   
   const imgLayer = () => {
     return (
@@ -158,7 +158,7 @@ const App = () => {
     
     if (isLayerSwap) return;
     
-    const text = mode.text === "Aa" ? textAreaRef.current.value : mode.text;
+    const text = mode.text === "Aa" ? effectText : mode.text;
     if (text == "") return;
     
     const tmp: effectItemType = {
@@ -169,6 +169,27 @@ const App = () => {
       y: e.target.getStage()!.pointerPos!.y
     };
     setEffectLayerItems(prevState => [...prevState, tmp]);
+  };
+  
+  const onDownloadClick = () => {
+    const uri = stageRef.current.toDataURL();
+    const link = document.createElement('a');
+    link.download = "参加表明";
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  const onSwapClick = () => {
+    setLayerSwap(prevState => {
+      if (prevState) {
+        setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
+      } else {
+        setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()]);
+      }
+      return !prevState;
+    });
   };
   
   return (
@@ -185,35 +206,12 @@ const App = () => {
         <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
       </ul>
       
-      <div id={"menu"}>
-        <MenuButton setState={setMode} value={"Aa"} fontSize={30}/>
-        <textarea ref={textAreaRef}></textarea>
-        <MenuButton setState={setMode} value={"○"} fontSize={90}/>
-        <MenuButton setState={setMode} value={"✔"} fontSize={30}/>
-        <button onClick={() => {
-          setLayerSwap(prevState => {
-            if (prevState) {
-              setLayer([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
-            } else {
-              setLayer([templateLayer(), imgLayer(), effectLayer(), overlayLayerItem()]);
-            }
-            return !prevState;
-          });
-        }} value={"背面を編集"}>{"背面を編集"}</button>
-        <button onClick={() => {
-          const uri = stageRef.current.toDataURL();
-          const link = document.createElement('a');
-          link.download = "参加表明";
-          link.href = uri;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }}>{"ダウンロード"}</button>
-        <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
-           data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
-        <script src="https://platform.twitter.com/widgets.js"></script>
-        <p>{mode.text}</p>
-      </div>
+      <MenuItems setMode={setMode} mode={mode} setEffectText={setEffectText} onDownloadClick={onDownloadClick}
+                 onSwapClick={onSwapClick}/>
+      
+      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
+         data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
+      <script src="https://platform.twitter.com/widgets.js"></script>
       <TemplateDropZone setState={setTemplateImage}/>
       <ImgDropZone setState={setImageLayerItems}/>
       
