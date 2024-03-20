@@ -206,12 +206,10 @@ const App = () => {
         <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
       </ul>
       
-      <MenuItems setMode={setMode} mode={mode} setEffectText={setEffectText} onDownloadClick={onDownloadClick}
+      <MenuItems setMode={setMode} mode={mode}
+                 setEffectText={setEffectText}
+                 onDownloadClick={onDownloadClick}
                  onSwapClick={onSwapClick}/>
-      
-      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
-         data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
-      <script src="https://platform.twitter.com/widgets.js"></script>
       <TemplateDropZone setState={setTemplateImage}/>
       <ImgDropZone setState={setImageLayerItems}/>
       
