@@ -6,18 +6,23 @@ import {KonvaEventObject} from "konva/lib/Node";
 import {useDispatch, useSelector} from "react-redux";
 import {replace} from "../modules/imageItemsSlice.ts";
 import {RootState} from "../modules/store.ts";
+import {select} from "../modules/selectIdSlice.ts";
 
 type ImgLayerItemType = {
-  item: imageItemType,
-  isSelected: boolean,
-  onSelect: () => void
+  item: imageItemType
 }
 
-export const ImgLayerItem = ({item, isSelected, onSelect}: ImgLayerItemType) => {
+export const ImgLayerItem = ({item}: ImgLayerItemType) => {
   const imageRef = useRef<Konva.Image>(null!);
   const trRef = useRef<Konva.Transformer>(null!);
-  const imageItems = useSelector((state: RootState) => state.imageItems);
+  const state = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
+  
+  const isSelected = state.selectId.id === item.id;
+  
+  const onSelect = () => {
+    dispatch(select(item.id));
+  };
   
   useEffect(() => {
     if (isSelected) {
@@ -29,9 +34,9 @@ export const ImgLayerItem = ({item, isSelected, onSelect}: ImgLayerItemType) => 
   
   const imageItemHandleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const id = e.target.name();
-    const items = imageItems.slice();
-    const item = imageItems.find((i) => i.id === id)!;
-    const index = imageItems.indexOf(item);
+    const items = state.imageItems.slice();
+    const item = state.imageItems.find((i) => i.id === id)!;
+    const index = state.imageItems.indexOf(item);
     
     const node = imageRef.current;
     const scaleX = node.scaleX();

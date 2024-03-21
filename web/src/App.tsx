@@ -9,6 +9,7 @@ import DeleteIcon from "./assets/delete_FILL0_wght400_GRAD0_opsz24.svg";
 import {ImgLayerItem} from "./component/ImgLayerItem.tsx";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./modules/store.ts";
+import {unselect} from "./modules/selectIdSlice.ts";
 
 export type effectItemType = {
   id: string,
@@ -44,22 +45,18 @@ const App = () => {
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
   const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
-  const [selectId, setSelectId] = useState<string | null>(null);
   
   const stageRef = useRef<Konva.Stage>(null!);
   const [effectText, setEffectText] = useState<string>("");
   
   const state = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
   
   const imgLayer = () => {
     return (
       <>
         {state.imageItems.map((item) => {
-          return <ImgLayerItem
-            key={item.id}
-            item={item}
-            isSelected={selectId === item.id}
-            onSelect={() => setSelectId(item.id)}/>;
+          return <ImgLayerItem key={item.id} item={item}/>;
         })}
       </>
     );
@@ -147,13 +144,13 @@ const App = () => {
       }
       setLayer(layer);
     }
-  }, [templateImage, effectLayerItems, state.imageItems, mode, selectId]);
+  }, [templateImage, effectLayerItems, state.imageItems, mode, state.selectId.id]);
   
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
   const onClickPosition = (e: KonvaEventObject<MouseEvent | Event>) => {
     if (e.target.name() === "template") {
-      setSelectId(null);
+      dispatch(unselect());
     }
     
     if (isLayerSwap) return;
