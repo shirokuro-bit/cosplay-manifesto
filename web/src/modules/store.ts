@@ -1,9 +1,12 @@
-import imageItemsSlice from "./imageItemsSlice.ts";
 import {configureStore} from "@reduxjs/toolkit";
+
+import imageItemsSlice from "./imageItemsSlice.ts";
+import selectIdSlice from "./selectIdSlice.ts";
 
 export const store = configureStore({
   reducer: {
-    imageItems: imageItemsSlice
+    imageItems: imageItemsSlice,
+    selectId: selectIdSlice
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware({
     serializableCheck: false
