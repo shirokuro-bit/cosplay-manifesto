@@ -3,6 +3,7 @@ import {Box, Button, TextField, ToggleButton, ToggleButtonGroup} from "@mui/mate
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
+import {TweetLink} from "./TwitterShare.tsx";
 
 type MenuItemsType = {
   setMode: React.Dispatch<React.SetStateAction<modeType>>,
@@ -54,6 +55,7 @@ export const MenuItems = ({setMode, mode, setEffectText, onDownloadClick, onSwap
         背景を編集
       </ToggleButton>
       <Button variant={"outlined"} onClick={onDownloadClick}>ダウンロード</Button>
+      <TweetLink text={""} tweetText={""} url={""} hashtags={["コスマニ","参加表明"]}/>
     </Box>
   );
 };
