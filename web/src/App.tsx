@@ -7,6 +7,8 @@ import {TemplateDropZone} from "./component/TemplateDropZone.tsx";
 import {ImgDropZone} from "./component/ImgDropZone.tsx";
 import DeleteIcon from "./assets/delete_FILL0_wght400_GRAD0_opsz24.svg";
 import {ImgLayerItem} from "./component/ImgLayerItem.tsx";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "./modules/store.ts";
 
 export type effectItemType = {
   id: string,
@@ -25,7 +27,7 @@ export type imageItemType = {
   height: number
 }
 
-export type inputModeType =  "Aa" | "○" | "✔" | "削除";
+export type inputModeType = "Aa" | "○" | "✔" | "削除";
 
 export type modeType = {
   text: inputModeType,
@@ -40,26 +42,24 @@ const defaultMode: modeType = {
 const App = () => {
   const [mode, setMode] = useState<modeType>(defaultMode);
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
-  const [imageLayerItems, setImageLayerItems] = useState<imageItemType[]>([]);
   const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
-  
   const [selectId, setSelectId] = useState<string | null>(null);
   
   const stageRef = useRef<Konva.Stage>(null!);
   const [effectText, setEffectText] = useState<string>("");
   
+  const state = useSelector((state: RootState) => state);
+  
   const imgLayer = () => {
     return (
       <>
-        {imageLayerItems.map((item) => {
+        {state.imageItems.map((item) => {
           return <ImgLayerItem
             key={item.id}
             item={item}
-            imageLayerItems={imageLayerItems}
             isSelected={selectId === item.id}
-            onSelect={() => setSelectId(item.id)}
-            setImageLayerItems={setImageLayerItems}/>;
+            onSelect={() => setSelectId(item.id)}/>;
         })}
       </>
     );
@@ -136,7 +136,7 @@ const App = () => {
   };
   
   useEffect(() => {
-    if (templateImage || imageLayerItems) {
+    if (templateImage || state.imageItems) {
       // 画像が読み込まれたらステージを再描画
       // 画像の読み込みに関する処理をここに移動する
       let layer;
@@ -147,7 +147,7 @@ const App = () => {
       }
       setLayer(layer);
     }
-  }, [templateImage, effectLayerItems, imageLayerItems, mode, selectId]);
+  }, [templateImage, effectLayerItems, state.imageItems, mode, selectId]);
   
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
@@ -211,7 +211,7 @@ const App = () => {
                  onDownloadClick={onDownloadClick}
                  onSwapClick={onSwapClick}/>
       <TemplateDropZone setState={setTemplateImage}/>
-      <ImgDropZone setState={setImageLayerItems}/>
+      <ImgDropZone/>
       
       <Stage width={templateImage == undefined ? window.innerWidth : templateImage.naturalWidth}
              height={templateImage == undefined ? window.innerHeight : templateImage.naturalHeight}

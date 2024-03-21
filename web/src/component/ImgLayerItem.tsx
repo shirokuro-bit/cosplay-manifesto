@@ -1,20 +1,23 @@
 import {Image, Transformer} from "react-konva";
-import React, {Fragment, useEffect, useRef} from "react";
+import {Fragment, useEffect, useRef} from "react";
 import {imageItemType} from "../App.tsx";
 import Konva from "konva";
 import {KonvaEventObject} from "konva/lib/Node";
+import {useDispatch, useSelector} from "react-redux";
+import {replace} from "../modules/imageItemsSlice.ts";
+import {RootState} from "../modules/store.ts";
 
 type ImgLayerItemType = {
   item: imageItemType,
-  imageLayerItems: imageItemType[],
   isSelected: boolean,
-  setImageLayerItems: React.Dispatch<React.SetStateAction<imageItemType[]>>
   onSelect: () => void
 }
 
-export const ImgLayerItem = ({item, imageLayerItems, isSelected, setImageLayerItems, onSelect}: ImgLayerItemType) => {
+export const ImgLayerItem = ({item, isSelected, onSelect}: ImgLayerItemType) => {
   const imageRef = useRef<Konva.Image>(null!);
   const trRef = useRef<Konva.Transformer>(null!);
+  const imageItems = useSelector((state: RootState) => state.imageItems);
+  const dispatch = useDispatch();
   
   useEffect(() => {
     if (isSelected) {
@@ -26,9 +29,9 @@ export const ImgLayerItem = ({item, imageLayerItems, isSelected, setImageLayerIt
   
   const imageItemHandleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const id = e.target.name();
-    const items = imageLayerItems.slice();
-    const item = imageLayerItems.find((i) => i.id === id)!;
-    const index = imageLayerItems.indexOf(item);
+    const items = imageItems.slice();
+    const item = imageItems.find((i) => i.id === id)!;
+    const index = imageItems.indexOf(item);
     
     const node = imageRef.current;
     const scaleX = node.scaleX();
@@ -45,7 +48,7 @@ export const ImgLayerItem = ({item, imageLayerItems, isSelected, setImageLayerIt
       width: Math.max(5, node.width() * scaleX),
       height: Math.max(node.height() * scaleY),
     };
-    setImageLayerItems(items);
+    dispatch(replace(items));
   };
   
   return (
