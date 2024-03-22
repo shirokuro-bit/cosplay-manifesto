@@ -45,7 +45,6 @@ const App = () => {
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
   const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
-  const [effectText, setEffectText] = useState<string>("");
   
   const stageRef = useRef<Konva.Stage>(null!);
   
@@ -155,7 +154,7 @@ const App = () => {
     
     if (isLayerSwap) return;
     
-    const text = state.editMode.text === "Aa" ? effectText : state.editMode.text;
+    const text = state.editMode.text === "Aa" ? state.effectText.text : state.editMode.text;
     if (text == "") return;
     
     const tmp: effectItemType = {
@@ -203,8 +202,7 @@ const App = () => {
         <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
       </ul>
       
-      <MenuItems setEffectText={setEffectText}
-                 onDownloadClick={onDownloadClick}
+      <MenuItems onDownloadClick={onDownloadClick}
                  onSwapClick={onSwapClick}/>
       <TemplateDropZone setState={setTemplateImage}/>
       <ImgDropZone/>

@@ -7,9 +7,9 @@ import {TweetLink} from "./TwitterShare.tsx";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../modules/store.ts";
 import {setMode} from "../modules/editModeSlice.ts";
+import {setTest} from "../modules/effectTextSlice.ts";
 
 type MenuItemsType = {
-  setEffectText: React.Dispatch<React.SetStateAction<string>>,
   onDownloadClick: () => void,
   onSwapClick: () => void
 }
@@ -20,7 +20,7 @@ type MenuButtonType = {
   icon: JSX.Element
 }
 
-export const MenuItems = ({setEffectText, onDownloadClick, onSwapClick}: MenuItemsType) => {
+export const MenuItems = ({onDownloadClick, onSwapClick}: MenuItemsType) => {
   const state = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
   
@@ -29,7 +29,7 @@ export const MenuItems = ({setEffectText, onDownloadClick, onSwapClick}: MenuIte
   };
   
   const onChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setEffectText(e.target.value);
+    dispatch(setTest(e.target.value));
   };
   
   const MenuButton = ({value, fontSize, icon}: MenuButtonType) => {
