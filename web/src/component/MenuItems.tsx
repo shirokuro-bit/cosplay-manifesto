@@ -4,11 +4,12 @@ import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
 import {TweetLink} from "./TwitterShare.tsx";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../modules/store.ts";
+import {setMode} from "../modules/editModeSlice.ts";
 
 type MenuItemsType = {
-  setMode: React.Dispatch<React.SetStateAction<modeType>>,
   setEffectText: React.Dispatch<React.SetStateAction<string>>,
-  mode: modeType,
   onDownloadClick: () => void,
   onSwapClick: () => void
 }
@@ -19,9 +20,12 @@ type MenuButtonType = {
   icon: JSX.Element
 }
 
-export const MenuItems = ({setMode, mode, setEffectText, onDownloadClick, onSwapClick}: MenuItemsType) => {
+export const MenuItems = ({setEffectText, onDownloadClick, onSwapClick}: MenuItemsType) => {
+  const state = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+  
   const onClickHandle = (value: modeType) => {
-    setMode(value);
+    dispatch(setMode(value));
   };
   
   const onChangeHandle = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -38,7 +42,7 @@ export const MenuItems = ({setMode, mode, setEffectText, onDownloadClick, onSwap
   
   return (
     <Box display={"flex"}>
-      <ToggleButtonGroup exclusive value={mode.text}>
+      <ToggleButtonGroup exclusive value={state.editMode.text}>
         <MenuButton value={"Aa"} fontSize={30} icon={<EditIcon/>}/>
         <MenuButton value={"○"} fontSize={90} icon={<CircleOutlinedIcon/>}/>
         <MenuButton value={"✔"} fontSize={30} icon={<DoneIcon/>}/>

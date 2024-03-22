@@ -10,6 +10,7 @@ import {ImgLayerItem} from "./component/ImgLayerItem.tsx";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./modules/store.ts";
 import {unselect} from "./modules/selectIdSlice.ts";
+import {remove, setMode} from "./modules/editModeSlice.ts";
 
 export type effectItemType = {
   id: string,
@@ -41,13 +42,12 @@ const defaultMode: modeType = {
 };
 
 const App = () => {
-  const [mode, setMode] = useState<modeType>(defaultMode);
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
   const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
+  const [effectText, setEffectText] = useState<string>("");
   
   const stageRef = useRef<Konva.Stage>(null!);
-  const [effectText, setEffectText] = useState<string>("");
   
   const state = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
@@ -78,7 +78,7 @@ const App = () => {
             draggable
             x={item.x}
             y={item.y}
-            onDragStart={() => setMode({text: "削除", fontSize: 0})}
+            onDragStart={() => dispatch(remove())}
             onDragEnd={effectItemHandleDragEnd}
             onTouchEnd={effectItemHandleDragEnd}
           />;
@@ -94,7 +94,7 @@ const App = () => {
     const stageSize = stageRef.current.getSize();
     
     return (<Image image={deleteIcon}
-                   visible={mode.text == "削除"}
+                   visible={state.editMode.text == "削除"}
                    x={(stageSize.width * 0.5) - (deleteIcon.width * 0.5)}
                    y={stageSize.height * 0.85 - (deleteIcon.height * 0.5)}
     />);
@@ -127,8 +127,8 @@ const App = () => {
       console.error("ポインターを取得できません");
       return;
     }
-    if (mode.text == "削除" && isDeleteArea(stageRef.current.pointerPos)) items.splice(index, 1);
-    setMode(defaultMode);
+    if (state.editMode.text == "削除" && isDeleteArea(stageRef.current.pointerPos)) items.splice(index, 1);
+    dispatch(setMode(defaultMode));
     setEffectLayerItems(items);
   };
   
@@ -144,7 +144,7 @@ const App = () => {
       }
       setLayer(layer);
     }
-  }, [templateImage, effectLayerItems, state.imageItems, mode, state.selectId.id]);
+  }, [templateImage, effectLayerItems, state.imageItems, state.editMode, state.selectId.id]);
   
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
@@ -155,13 +155,13 @@ const App = () => {
     
     if (isLayerSwap) return;
     
-    const text = mode.text === "Aa" ? effectText : mode.text;
+    const text = state.editMode.text === "Aa" ? effectText : state.editMode.text;
     if (text == "") return;
     
     const tmp: effectItemType = {
       id: "EffectItemNode-" + crypto.randomUUID(),
       text: text,
-      fontSize: mode.fontSize,
+      fontSize: state.editMode.fontSize,
       x: e.target.getStage()!.pointerPos!.x,
       y: e.target.getStage()!.pointerPos!.y
     };
@@ -203,8 +203,7 @@ const App = () => {
         <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
       </ul>
       
-      <MenuItems setMode={setMode} mode={mode}
-                 setEffectText={setEffectText}
+      <MenuItems setEffectText={setEffectText}
                  onDownloadClick={onDownloadClick}
                  onSwapClick={onSwapClick}/>
       <TemplateDropZone setState={setTemplateImage}/>
