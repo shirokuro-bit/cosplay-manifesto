@@ -168,6 +168,7 @@ const App = () => {
   };
   
   const onDownloadClick = () => {
+    dispatch(unselect());
     const uri = stageRef.current.toDataURL();
     const link = document.createElement('a');
     link.download = "参加表明";
