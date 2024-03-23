@@ -1,6 +1,6 @@
 import {Fragment, useEffect, useRef, useState} from "react";
 import {MenuItems} from "./component/MenuItems.tsx";
-import {Image, Layer, Stage, Text} from "react-konva";
+import {Image, Layer, Rect, Stage, Text} from "react-konva";
 import {KonvaEventObject} from "konva/lib/Node";
 import Konva from "konva";
 import {TemplateDropZone} from "./component/TemplateDropZone.tsx";
@@ -97,6 +97,12 @@ const App = () => {
                    x={(stageSize.width * 0.5) - (deleteIcon.width * 0.5)}
                    y={stageSize.height * 0.85 - (deleteIcon.height * 0.5)}
     />);
+  };
+  
+  const BackgroundLayer = ({color}: { color: string }) => {
+    return <Rect width={templateImage == undefined ? window.innerWidth : templateImage.naturalWidth}
+                 height={templateImage == undefined ? window.innerHeight : templateImage.naturalHeight}
+                 fill={color}/>;
   };
   
   const isDeleteArea = (pointer: { x: number, y: number }): boolean => {
@@ -213,6 +219,7 @@ const App = () => {
              ref={stageRef}
       >
         <Layer onClick={onClickPosition} onTap={onClickPosition}>
+          <BackgroundLayer color={"white"}/>
           {layer.map((value, index) => <Fragment key={index} children={value}/>)}
         </Layer>
       </Stage>
