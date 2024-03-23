@@ -1,12 +1,16 @@
 import {Fragment, useEffect, useRef, useState} from "react";
 import {MenuItems} from "./component/MenuItems.tsx";
-import {Image, Layer, Stage, Text} from "react-konva";
+import {Image, Layer, Rect, Stage, Text} from "react-konva";
 import {KonvaEventObject} from "konva/lib/Node";
 import Konva from "konva";
 import {TemplateDropZone} from "./component/TemplateDropZone.tsx";
 import {ImgDropZone} from "./component/ImgDropZone.tsx";
 import DeleteIcon from "./assets/delete_FILL0_wght400_GRAD0_opsz24.svg";
 import {ImgLayerItem} from "./component/ImgLayerItem.tsx";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "./modules/store.ts";
+import {unselect} from "./modules/selectIdSlice.ts";
+import {remove, setMode} from "./modules/editModeSlice.ts";
 
 export type effectItemType = {
   id: string,
@@ -25,7 +29,7 @@ export type imageItemType = {
   height: number
 }
 
-export type inputModeType =  "Aa" | "○" | "✔" | "削除";
+export type inputModeType = "Aa" | "○" | "✔" | "削除";
 
 export type modeType = {
   text: inputModeType,
@@ -38,28 +42,20 @@ const defaultMode: modeType = {
 };
 
 const App = () => {
-  const [mode, setMode] = useState<modeType>(defaultMode);
   const [templateImage, setTemplateImage] = useState<HTMLImageElement>();
-  const [imageLayerItems, setImageLayerItems] = useState<imageItemType[]>([]);
   const [effectLayerItems, setEffectLayerItems] = useState<effectItemType[]>([]);
   const [isLayerSwap, setLayerSwap] = useState(false);
   
-  const [selectId, setSelectId] = useState<string | null>(null);
-  
   const stageRef = useRef<Konva.Stage>(null!);
-  const [effectText, setEffectText] = useState<string>("");
+  
+  const state = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
   
   const imgLayer = () => {
     return (
       <>
-        {imageLayerItems.map((item) => {
-          return <ImgLayerItem
-            key={item.id}
-            item={item}
-            imageLayerItems={imageLayerItems}
-            isSelected={selectId === item.id}
-            onSelect={() => setSelectId(item.id)}
-            setImageLayerItems={setImageLayerItems}/>;
+        {state.imageItems.map((item) => {
+          return <ImgLayerItem key={item.id} item={item}/>;
         })}
       </>
     );
@@ -81,7 +77,7 @@ const App = () => {
             draggable
             x={item.x}
             y={item.y}
-            onDragStart={() => setMode({text: "削除", fontSize: 0})}
+            onDragStart={() => dispatch(remove())}
             onDragEnd={effectItemHandleDragEnd}
             onTouchEnd={effectItemHandleDragEnd}
           />;
@@ -97,10 +93,16 @@ const App = () => {
     const stageSize = stageRef.current.getSize();
     
     return (<Image image={deleteIcon}
-                   visible={mode.text == "削除"}
+                   visible={state.editMode.text == "削除"}
                    x={(stageSize.width * 0.5) - (deleteIcon.width * 0.5)}
                    y={stageSize.height * 0.85 - (deleteIcon.height * 0.5)}
     />);
+  };
+  
+  const BackgroundLayer = ({color}: { color: string }) => {
+    return <Rect width={templateImage == undefined ? window.innerWidth : templateImage.naturalWidth}
+                 height={templateImage == undefined ? window.innerHeight : templateImage.naturalHeight}
+                 fill={color}/>;
   };
   
   const isDeleteArea = (pointer: { x: number, y: number }): boolean => {
@@ -130,13 +132,13 @@ const App = () => {
       console.error("ポインターを取得できません");
       return;
     }
-    if (mode.text == "削除" && isDeleteArea(stageRef.current.pointerPos)) items.splice(index, 1);
-    setMode(defaultMode);
+    if (state.editMode.text == "削除" && isDeleteArea(stageRef.current.pointerPos)) items.splice(index, 1);
+    dispatch(setMode(defaultMode));
     setEffectLayerItems(items);
   };
   
   useEffect(() => {
-    if (templateImage || imageLayerItems) {
+    if (templateImage || state.imageItems) {
       // 画像が読み込まれたらステージを再描画
       // 画像の読み込みに関する処理をここに移動する
       let layer;
@@ -147,24 +149,24 @@ const App = () => {
       }
       setLayer(layer);
     }
-  }, [templateImage, effectLayerItems, imageLayerItems, mode, selectId]);
+  }, [templateImage, effectLayerItems, state.imageItems, state.editMode, state.selectId.id]);
   
   const [layer, setLayer] = useState([imgLayer(), templateLayer(), effectLayer(), overlayLayerItem()]);
   
   const onClickPosition = (e: KonvaEventObject<MouseEvent | Event>) => {
     if (e.target.name() === "template") {
-      setSelectId(null);
+      dispatch(unselect());
     }
     
     if (isLayerSwap) return;
     
-    const text = mode.text === "Aa" ? effectText : mode.text;
+    const text = state.editMode.text === "Aa" ? state.effectText.text : state.editMode.text;
     if (text == "") return;
     
     const tmp: effectItemType = {
       id: "EffectItemNode-" + crypto.randomUUID(),
       text: text,
-      fontSize: mode.fontSize,
+      fontSize: state.editMode.fontSize,
       x: e.target.getStage()!.pointerPos!.x,
       y: e.target.getStage()!.pointerPos!.y
     };
@@ -172,6 +174,7 @@ const App = () => {
   };
   
   const onDownloadClick = () => {
+    dispatch(unselect());
     const uri = stageRef.current.toDataURL();
     const link = document.createElement('a');
     link.download = "参加表明";
@@ -206,20 +209,17 @@ const App = () => {
         <li>編集を保存する機能は現状ございません。リロードやタスク切りが発生しますとデータが消えてしまいますのでご注意ください。</li>
       </ul>
       
-      <MenuItems setMode={setMode} mode={mode} setEffectText={setEffectText} onDownloadClick={onDownloadClick}
+      <MenuItems onDownloadClick={onDownloadClick}
                  onSwapClick={onSwapClick}/>
-      
-      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" className="twitter-share-button" data-text="参加表明"
-         data-url="http://localhost:5173/" data-show-count="false">Tweet</a>
-      <script src="https://platform.twitter.com/widgets.js"></script>
       <TemplateDropZone setState={setTemplateImage}/>
-      <ImgDropZone setState={setImageLayerItems}/>
+      <ImgDropZone/>
       
       <Stage width={templateImage == undefined ? window.innerWidth : templateImage.naturalWidth}
              height={templateImage == undefined ? window.innerHeight : templateImage.naturalHeight}
              ref={stageRef}
       >
         <Layer onClick={onClickPosition} onTap={onClickPosition}>
+          <BackgroundLayer color={"white"}/>
           {layer.map((value, index) => <Fragment key={index} children={value}/>)}
         </Layer>
       </Stage>
